@@ -22,6 +22,8 @@ public class MainWindowController extends BaseController implements Initializabl
 
     private WeatherService weatherServiceLeft;
     private WeatherService weatherServiceRight;
+    private WeatherForecast weatherForecastLeft;
+    private WeatherForecast weatherForecastRight;
 
     public MainWindowController(ViewFactory viewFactory, String fxmlName) {
         super(viewFactory, fxmlName);
@@ -36,17 +38,39 @@ public class MainWindowController extends BaseController implements Initializabl
     @FXML
     void clickLeft(ActionEvent event) {
         System.out.println("left clicked!");
-        WeatherForecast weatherForecast = weatherServiceLeft.getWeather();
 
-        displayWeatherLeft(weatherForecast);
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                weatherForecastLeft = weatherServiceLeft.getWeather();
+                try { Thread.sleep(3000); } catch (InterruptedException e) { }
+            }
+        });
+        thread.start();
+
+        try { thread.join(); } catch (InterruptedException e) { }
+
+        displayWeatherLeft(weatherForecastLeft);
     }
 
     @FXML
     void clickRight(ActionEvent event) {
         System.out.println("right clicked!");
-        WeatherForecast weatherForecast = weatherServiceRight.getWeather();
 
-        displayWeatherRight(weatherForecast);
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                weatherForecastRight = weatherServiceRight.getWeather();
+                try { Thread.sleep(3000); } catch (InterruptedException e) { }
+            }
+        });
+        thread.start();
+
+        try { thread.join(); } catch (InterruptedException e) { }
+
+        if(!thread.isAlive()) {
+            displayWeatherRight(weatherForecastRight);
+        }
     }
 
     private void displayWeatherLeft(WeatherForecast weatherForecast) {
